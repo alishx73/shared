@@ -1,0 +1,102 @@
+import { Users } from '../database/db-models';
+
+import {
+  ASSIGN_SENIOR_ROLE,
+  ASSIGN_JUNIOR_ROLE,
+  CHANGE_SENIOR_ROLE,
+  CHANGE_JUNIOR_ROLE,
+  REMOVE_SENIOR_ROLE,
+  REMOVE_JUNIOR_ROLE,
+  VIEW_ACTIVITY_LOGS,
+  EDIT_SUPER_CURATION_RATING,
+  EDIT_SENIOR_CURATION_RATING,
+  EDIT_JUNIOR_CURATION_RATING,
+  EDIT_SUPER_CURATION_TAGS,
+  EDIT_SENIOR_CURATION_TAGS,
+  EDIT_JUNIOR_CURATION_TAGS,
+  ASSIGN_SUPER_CURATION_RATING,
+  ASSIGN_SENIOR_CURATION_RATING,
+  ASSIGN_JUNIOR_CURATION_RATING,
+  ASSIGN_SENIOR_CURATION_TAGS,
+  ASSIGN_SUPER_CURATION_TAGS,
+  ASSIGN_JUNIOR_CURATION_TAGS,
+  ADD_NEW_TAG,
+  DELETE_TAG,
+  FREEZE_MISSION,
+  SUSPEND_USER,
+  VIEW_BAN_FREEZE,
+} from './rbac.permissions';
+
+import {
+  ROLE_DEFAULT,
+  ROLE_SUPER_CURATOR,
+  ROLE_SENIOR_CURATOR,
+  ROLE_JUNIOR_CURATOR,
+} from './rbac.roles';
+
+const PERMISSIONS = {
+  [ROLE_SUPER_CURATOR]: [
+    ASSIGN_SENIOR_ROLE,
+    ASSIGN_JUNIOR_ROLE,
+    CHANGE_SENIOR_ROLE,
+    CHANGE_JUNIOR_ROLE,
+    REMOVE_SENIOR_ROLE,
+    REMOVE_JUNIOR_ROLE,
+    VIEW_ACTIVITY_LOGS,
+    EDIT_SUPER_CURATION_RATING,
+    EDIT_SENIOR_CURATION_RATING,
+    EDIT_JUNIOR_CURATION_RATING,
+    EDIT_SUPER_CURATION_TAGS,
+    EDIT_SENIOR_CURATION_TAGS,
+    EDIT_JUNIOR_CURATION_TAGS,
+    ASSIGN_SUPER_CURATION_RATING,
+    ASSIGN_SENIOR_CURATION_RATING,
+    ASSIGN_JUNIOR_CURATION_RATING,
+    ASSIGN_SENIOR_CURATION_TAGS,
+    ASSIGN_SUPER_CURATION_TAGS,
+    ASSIGN_JUNIOR_CURATION_TAGS,
+    ADD_NEW_TAG,
+    DELETE_TAG,
+    FREEZE_MISSION,
+    SUSPEND_USER,
+    VIEW_BAN_FREEZE,
+  ],
+  [ROLE_SENIOR_CURATOR]: [
+    VIEW_ACTIVITY_LOGS,
+    EDIT_JUNIOR_CURATION_RATING,
+    EDIT_JUNIOR_CURATION_TAGS,
+    ASSIGN_JUNIOR_CURATION_RATING,
+    ASSIGN_JUNIOR_CURATION_TAGS,
+  ],
+  [ROLE_JUNIOR_CURATOR]: [VIEW_ACTIVITY_LOGS],
+};
+
+const getUserRole = async (uid) => {
+  try {
+    // find user
+    const user = await Users.findOne({ _id: uid }, { roles: 1 }).lean();
+
+    if (!user || !user.roles) {
+      return ROLE_DEFAULT;
+    }
+
+    // check if valid role exists
+    let userRole = null;
+
+    user.roles.forEach((r) => {
+      if (r.role in PERMISSIONS) {
+        userRole = r.role;
+      }
+    });
+    if (userRole === null) {
+      return ROLE_DEFAULT;
+    }
+
+    return userRole;
+  } catch (err) {
+    return ROLE_DEFAULT;
+  }
+};
+
+// eslint-disable-next-line
+export { getUserRole };
